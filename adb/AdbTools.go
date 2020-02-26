@@ -45,3 +45,7 @@ func RunShellCommandCb(commands []string, callback shell.RunShellCallback) {
 func RunShellContentQuery(url string) string {
 	return shell.RunShellRes("adb", "shell", "content", "query", "--uri", url)
 }
+
+func ReadLogcat(callback shell.RunShellCallback) {
+	shell.RunShellCb(callback, "adb", "shell", "logcat")
+}
