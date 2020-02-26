@@ -36,8 +36,9 @@ func RunCommand(command ...string) string {
 	return shell.RunShellRes("adb", command...)
 }
 
-func RunShellCommand(command string) string {
-	return shell.RunShellRes("adb", "shell", command)
+// 运行一行 adb shell 命令
+func RunShellCommandCb(commands []string, callback shell.RunShellCallback) {
+	shell.RunOtherShell("adb shell", commands, callback)
 }
 
 // 运行 Content Query
