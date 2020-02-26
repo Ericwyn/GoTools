@@ -39,3 +39,8 @@ func RunCommand(command ...string) string {
 func RunShellCommand(command string) string {
 	return shell.RunShellRes("adb", "shell", command)
 }
+
+// 运行 Content Query
+func RunShellContentQuery(url string) string {
+	return shell.RunShellRes("adb", "shell", "content", "query", "--uri", url)
+}
