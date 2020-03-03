@@ -1,15 +1,17 @@
 package file
 
 import (
+	"bufio"
+	"fmt"
+	"io"
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"strconv"
 	"time"
 )
 
 type File struct {
-	//stat os.FileInfo
-
 	isExits bool
 
 	name    string
@@ -18,9 +20,6 @@ type File struct {
 	isFile  bool
 	file    *os.File
 	extName string
-
-	//fileInfos []os.FileInfo // 需要实时更新
-	//children []File // 懒加载，需要时候才调用
 }
 
 func OpenFile(openPath string) File {
@@ -120,12 +119,12 @@ func (obj *File) Move(newPath string) bool {
 	//moveToDir := false
 	newFileAbsPath := "null_null_null_null"
 	if filepath.IsAbs(newPath) {
-		if newPath[len(newPath)-1] == '/' {
+		if newPath[len(newPath)-1] == os.PathSeparator {
 			// 移动到文件夹
 			newFileAbsPath = filepath.Join(newPath, obj.name)
 		}
 	} else {
-		if newPath[len(newPath)-1] == '/' {
+		if newPath[len(newPath)-1] == os.PathSeparator {
 			// 移动到文件夹
 			newFileAbsPath = filepath.Join(obj.ParentPath(), newPath, obj.name)
 		} else {
@@ -208,13 +207,14 @@ func (obj *File) CreateFile() bool {
 	}
 }
 
-func (obj *File) Open() *os.File {
+func (obj *File) Open() (*os.File, error) {
 	file, err := os.OpenFile(obj.absPath, int(obj.stat().Mode()), 0755)
 	if err != nil {
-		panic(err)
+		//panic(err)
+		return nil, err
 	}
 	obj.file = file
-	return obj.file
+	return obj.file, nil
 }
 
 func (obj *File) Close() error {
@@ -224,6 +224,88 @@ func (obj *File) Close() error {
 			return err
 		}
 	}
+	return nil
+}
+
+// 读取全部然后返回
+func (obj *File) Read() ([]byte, error) {
+	file, err := os.OpenFile(obj.absPath, os.O_RDONLY, os.FileMode(0777))
+	if err != nil {
+		return nil, err
+	}
+	defer file.Close()
+	r := bufio.NewReader(file)
+
+	bufRes := make([]byte, 0)
+
+	bufReadTemp := make([]byte, 1024)
+	for {
+		n, err := r.Read(bufReadTemp)
+		if err != nil && err != io.EOF {
+			//panic(err)
+			return nil, err
+		}
+		if 0 == n {
+			break
+		} else {
+			// 将读取到的数据交给 callback 处理
+			bufRes = append(bufRes, bufReadTemp[:n]...)
+		}
+	}
+	return bufRes, nil
+}
+
+// 单行读取
+func (obj *File) ReadLine(readFileCb ReadFileCallBack) {
+	file, err := os.OpenFile(obj.absPath, os.O_RDONLY, os.FileMode(0777))
+	if err != nil {
+		// 没有 return 所以直接 panic
+		panic(err)
+		return
+	}
+	defer file.Close()
+	// Start reading from the file with a reader.
+	reader := bufio.NewReader(file)
+
+	var line string
+	for {
+		line, err = reader.ReadString('\n')
+		if err != nil {
+			if err != io.EOF {
+				panic(err)
+			}
+			break
+		}
+		readFileCb(line)
+	}
+	return
+}
+
+type WriteType int
+
+const (
+	W_APPEN = WriteType(os.O_APPEND | os.O_CREATE | os.O_RDWR)
+	W_NEW   = WriteType(os.O_CREATE | os.O_RDWR)
+)
+
+func (obj *File) Write(writeType WriteType, data []string) error {
+	fl, err := os.OpenFile(obj.absPath, int(writeType), os.FileMode(0777))
+	if err != nil {
+		return err
+	}
+	defer fl.Close()
+
+	for _, v := range data {
+		n, err := fl.WriteString(v)
+		if err != nil {
+			fmt.Println(err.Error())
+			//return
+		}
+		if n < len(v) {
+			fmt.Println("write byte num error")
+		}
+	}
+
 	return nil
 }
 
@@ -264,7 +346,7 @@ func (obj *File) Children() []File {
 		if len(infos) > 0 {
 			var childrenTemp File
 			for _, info := range infos {
-				childrenTemp = OpenFile(obj.absPath + "/" + info.Name())
+				childrenTemp = OpenFile(obj.absPath + strconv.Itoa(os.PathSeparator) + info.Name())
 				resArr = append(resArr, childrenTemp)
 			}
 			return resArr
