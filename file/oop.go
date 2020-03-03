@@ -1,7 +1,6 @@
 package file
 
 import (
-	"fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -57,12 +56,14 @@ func OpenFile(openPath string) File {
 		obj.isFile = false
 	} else {
 		obj.isFile = true
-		file, err := os.OpenFile(obj.absPath, int(stat.Mode()), 0755)
-		//file, err := os.OpenFile(obj.absPath)
-		if err != nil {
-			panic(err)
-		}
-		obj.file = file
+		// 这里不打开文件, 不然所有的 OpenFile 都会打开一个文件，可能会因为没及时关闭而出现错误
+		// 文件的打开需要使用 Open() 方法
+		//file, err := os.OpenFile(obj.absPath, int(stat.Mode()), 0755)
+		////file, err := os.OpenFile(obj.absPath)
+		//if err != nil {
+		//	panic(err)
+		//}
+		//obj.file = file
 
 		obj.extName = filepath.Ext(obj.absPath)
 	}
@@ -109,21 +110,6 @@ func (obj *File) Rename(newName string) {
 		panic(err)
 	}
 	obj.refresh(newAbsPath)
-}
-
-func (obj *File) CreateFile() bool {
-	if obj.Exits() && obj.isFile {
-		return true
-	} else {
-		fmt.Println(obj.absPath)
-		_, err := os.Create(obj.absPath)
-		if err != nil {
-			panic(err)
-		} else {
-			obj.refresh(obj.absPath)
-			return true
-		}
-	}
 }
 
 // 移动到另一个位置
@@ -184,13 +170,13 @@ func (obj *File) IsFile() bool {
 	return obj.isFile
 }
 
-func (obj *File) File() *os.File {
-	if obj.isFile {
-		return obj.file
-	} else {
-		return nil
-	}
-}
+//func (obj *File) File() *os.File {
+//	if obj.isFile {
+//		return obj.file
+//	} else {
+//		return nil
+//	}
+//}
 
 func (obj *File) Size() int64 {
 	if obj.isFile {
@@ -206,6 +192,39 @@ func (obj *File) Ext() string {
 	} else {
 		return ""
 	}
+}
+
+func (obj *File) CreateFile() bool {
+	if obj.Exits() && obj.isFile {
+		return true
+	} else {
+		_, err := os.Create(obj.absPath)
+		if err != nil {
+			panic(err)
+		} else {
+			obj.refresh(obj.absPath)
+			return true
+		}
+	}
+}
+
+func (obj *File) Open() *os.File {
+	file, err := os.OpenFile(obj.absPath, int(obj.stat().Mode()), 0755)
+	if err != nil {
+		panic(err)
+	}
+	obj.file = file
+	return obj.file
+}
+
+func (obj *File) Close() error {
+	if obj.Exits() && obj.file != nil {
+		err := obj.file.Close()
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 // 文件夹的 api ---------------------------------------------
