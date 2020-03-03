@@ -38,3 +38,11 @@ func ConverToInt(str string) int {
 func Split(str string, sep string) []string {
 	return strings.Split(str, sep)
 }
+
+func ToLowCase(str string) string {
+	return strings.ToLower(str)
+}
+
+func ToUpper(str string) string {
+	return strings.ToUpper(str)
+}
