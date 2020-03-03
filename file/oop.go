@@ -133,12 +133,19 @@ func (obj *File) Move(newPath string) bool {
 	}
 	//moveToDir := false
 	newFileAbsPath := "null_null_null_null"
-	if newPath[len(newPath)-1] == '/' {
-		// 移动到文件夹
-		newFileAbsPath = filepath.Join(obj.ParentPath(), newPath, obj.name)
+	if filepath.IsAbs(newPath) {
+		if newPath[len(newPath)-1] == '/' {
+			// 移动到文件夹
+			newFileAbsPath = filepath.Join(newPath, obj.name)
+		}
 	} else {
-		// 移动成另一个文件
-		newFileAbsPath = filepath.Join(obj.ParentPath(), newPath)
+		if newPath[len(newPath)-1] == '/' {
+			// 移动到文件夹
+			newFileAbsPath = filepath.Join(obj.ParentPath(), newPath, obj.name)
+		} else {
+			// 移动成另一个文件
+			newFileAbsPath = filepath.Join(obj.ParentPath(), newPath)
+		}
 	}
 	err := os.Rename(obj.absPath, newFileAbsPath)
 	obj.refresh(newFileAbsPath)
