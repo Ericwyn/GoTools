@@ -22,7 +22,8 @@ func getFormatString(formatStr string) string {
 		formatStr = str.ReplaceAll(formatStr, "yy", "06")
 		formatStr = str.ReplaceAll(formatStr, "MM", "01")
 		formatStr = str.ReplaceAll(formatStr, "dd", "02")
-		formatStr = str.ReplaceAll(formatStr, "hh", "15")
+		formatStr = str.ReplaceAll(formatStr, "HH", "15")
+		formatStr = str.ReplaceAll(formatStr, "hh", "3")
 		formatStr = str.ReplaceAll(formatStr, "mm", "04")
 		formatStr = str.ReplaceAll(formatStr, "ss", "05")
 		dateFormatMap[formatStrOld] = formatStr
