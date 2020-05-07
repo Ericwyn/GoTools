@@ -10,7 +10,7 @@ func ReplaceAll(str string, old string, new string) string {
 	if strings.Index(str, old) < 0 {
 		return str
 	} else {
-		return ReplaceAll(ReplaceAll(str, old, new), old, new)
+		return ReplaceAll(strings.ReplaceAll(str, old, new), old, new)
 	}
 }
 
