@@ -7,7 +7,6 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
-	"strconv"
 	"time"
 )
 
@@ -346,7 +345,7 @@ func (obj *File) Children() []File {
 		if len(infos) > 0 {
 			var childrenTemp File
 			for _, info := range infos {
-				childrenTemp = OpenFile(obj.absPath + strconv.Itoa(os.PathSeparator) + info.Name())
+				childrenTemp = OpenFile(obj.absPath + string(os.PathSeparator) + info.Name())
 				resArr = append(resArr, childrenTemp)
 			}
 			return resArr
