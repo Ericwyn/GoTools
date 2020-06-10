@@ -19,7 +19,11 @@ func Continues(str string, continueStr string) bool {
 }
 
 func StartWith(str string, startStr string) bool {
-	return strings.Index(str, startStr) == 0
+	return strings.HasPrefix(str, startStr)
+}
+
+func EndWith(str string, endStr string) bool {
+	return strings.HasSuffix(str, endStr)
 }
 
 func GetAllStrByRegexp(str string, arrRegexp *regexp.Regexp) []string {
