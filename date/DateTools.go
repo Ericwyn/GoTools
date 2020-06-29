@@ -12,6 +12,11 @@ func Format(time time.Time, formatStr string) string {
 	return time.Format(getFormatString(formatStr))
 }
 
+func ToTime(timeStr string, formatStr string) (time.Time, error) {
+	formatStr = getFormatString(formatStr)
+	return time.Parse(formatStr, timeStr)
+}
+
 // 传入 yyyyMMdd 之类的
 func getFormatString(formatStr string) string {
 	// 原始 format string
