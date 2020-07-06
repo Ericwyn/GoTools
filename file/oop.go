@@ -3,10 +3,12 @@ package file
 import (
 	"bufio"
 	"fmt"
+	"github.com/Ericwyn/GoTools/str"
 	"io"
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"runtime"
 	"time"
 )
 
@@ -42,7 +44,7 @@ func OpenFile(openPath string) File {
 	if err != nil {
 		panic(err)
 	}
-	obj.absPath = absPath
+	obj.absPath = toCurrentSystemPath(absPath)
 
 	// ------------ 如果路径本身不存在的话，就不需要做下面的处理了
 	if !obj.Exits() {
@@ -68,6 +70,16 @@ func OpenFile(openPath string) File {
 
 	// 文件和文件夹信息都是懒加载动态获取的，当需要的时候再实时获取
 	return obj
+}
+
+func toCurrentSystemPath(pathNow string) string {
+	var ostype = runtime.GOOS
+	if ostype == "windows" {
+		pathNow = str.ReplaceAll(pathNow, "/", "\\")
+	} else if ostype == "linux" {
+		pathNow = str.ReplaceAll(pathNow, "\\", "/")
+	}
+	return pathNow
 }
 
 // 共有的 api ---------------------------------------------
