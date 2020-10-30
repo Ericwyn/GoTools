@@ -7,11 +7,7 @@ import (
 )
 
 func ReplaceAll(str string, old string, new string) string {
-	if strings.Index(str, old) < 0 {
-		return str
-	} else {
-		return ReplaceAll(strings.ReplaceAll(str, old, new), old, new)
-	}
+	return strings.ReplaceAll(str, old, new)
 }
 
 func Continues(str string, continueStr string) bool {
