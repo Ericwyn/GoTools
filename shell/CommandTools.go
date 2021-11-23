@@ -9,22 +9,30 @@ import (
 	"io"
 	"os/exec"
 	"strings"
+	"syscall"
 	"time"
 )
 
 // 封装命令行调用
 
-var shell_debug = false
+var shellDebug = false
+var hideShellWindows = false
 
 func Debug(d bool) {
-	shell_debug = d
+	shellDebug = d
+}
+
+func HideWindows(hide bool) {
+	hideShellWindows = hide
 }
 
 func RunShellRes(name string, args ...string) string {
-	if shell_debug {
+	if shellDebug {
 		log(name, args)
 	}
 	cmd := exec.Command(name, args...)
+	cmd.SysProcAttr = &syscall.SysProcAttr{HideWindow: hideShellWindows}
+
 	//读取io.Writer类型的cmd.Stdout，再通过bytes.Buffer(缓冲byte类型的缓冲器)将byte类型转化为string类型(out.String():这是bytes类型提供的接口)
 	var out bytes.Buffer
 	var stderr bytes.Buffer
@@ -47,11 +55,12 @@ type RunShellCallback func(resLine string)
 
 // 对 shell 命令进行逐行回调处理
 func RunShellCb(cb RunShellCallback, name string, args ...string) {
-	if shell_debug {
+	if shellDebug {
 		log(name, args)
 	}
 	//函数返回一个*Cmd，用于使用给出的参数执行name指定的程序
 	cmd := exec.Command(name, args...)
+	cmd.SysProcAttr = &syscall.SysProcAttr{HideWindow: hideShellWindows}
 
 	////显示运行的命令
 	//fmt.Println(cmd.Args)
@@ -106,13 +115,17 @@ func RunOtherShell(initCommand string, shellCommands []string, callback RunShell
 	initCmdTemp := str.Split(initCommand, " ")
 	if len(initCmdTemp) == 1 {
 		cmd = exec.Command(initCommand)
-		if shell_debug {
+		cmd.SysProcAttr = &syscall.SysProcAttr{HideWindow: hideShellWindows}
+
+		if shellDebug {
 			log(initCommand, []string{})
 		}
 	} else {
 		args := initCmdTemp[1:len(initCmdTemp)]
 		cmd = exec.Command(initCmdTemp[0], args...)
-		if shell_debug {
+		cmd.SysProcAttr = &syscall.SysProcAttr{HideWindow: hideShellWindows}
+
+		if shellDebug {
 			log(initCmdTemp[0], args)
 		}
 	}
