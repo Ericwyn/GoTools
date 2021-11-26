@@ -14,10 +14,18 @@ import (
 
 // 封装命令行调用
 
+// 用来对 cmd 做特殊的处理, 以此适配 windows 或者是其他系统上面一些特殊的属性设置
+type CmdHandler func(cmd *exec.Cmd)
+
 var shell_debug = false
+var cmdHandler CmdHandler = func(cmd *exec.Cmd) {}
 
 func Debug(d bool) {
 	shell_debug = d
+}
+
+func SetCmdHandler(handler CmdHandler) {
+	cmdHandler = handler
 }
 
 func RunShellRes(name string, args ...string) string {
@@ -25,6 +33,7 @@ func RunShellRes(name string, args ...string) string {
 		log(name, args)
 	}
 	cmd := exec.Command(name, args...)
+	cmdHandler(cmd)
 	//读取io.Writer类型的cmd.Stdout，再通过bytes.Buffer(缓冲byte类型的缓冲器)将byte类型转化为string类型(out.String():这是bytes类型提供的接口)
 	var out bytes.Buffer
 	var stderr bytes.Buffer
@@ -52,6 +61,7 @@ func RunShellCb(cb RunShellCallback, name string, args ...string) {
 	}
 	//函数返回一个*Cmd，用于使用给出的参数执行name指定的程序
 	cmd := exec.Command(name, args...)
+	cmdHandler(cmd)
 
 	////显示运行的命令
 	//fmt.Println(cmd.Args)
@@ -106,6 +116,7 @@ func RunOtherShell(initCommand string, shellCommands []string, callback RunShell
 	initCmdTemp := str.Split(initCommand, " ")
 	if len(initCmdTemp) == 1 {
 		cmd = exec.Command(initCommand)
+		cmdHandler(cmd)
 		if shell_debug {
 			log(initCommand, []string{})
 		}
