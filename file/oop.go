@@ -320,6 +320,25 @@ func (obj *File) Write(writeType WriteType, data []string) error {
 	return nil
 }
 
+func (obj *File) WriteDate(writeType WriteType, date string) error {
+	fl, err := os.OpenFile(obj.absPath, int(writeType), os.FileMode(0777))
+	if err != nil {
+		return err
+	}
+	defer fl.Close()
+
+	n, err := fl.WriteString(date)
+	if err != nil {
+		fmt.Println(err.Error())
+		//return
+	}
+	if n < len(date) {
+		fmt.Println("write byte num error")
+	}
+
+	return nil
+}
+
 // 文件夹的 api ---------------------------------------------
 func (obj *File) Mkdir() bool {
 	if obj.Exits() && obj.IsDir() {
