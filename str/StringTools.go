@@ -46,3 +46,11 @@ func ToLowCase(str string) string {
 func ToUpper(str string) string {
 	return strings.ToUpper(str)
 }
+
+func Trim(str string) string {
+	str = strings.Trim(str, "\n")
+	str = strings.Trim(str, "\r")
+	str = strings.Trim(str, "\t")
+	str = strings.Trim(str, " ")
+	return str
+}
